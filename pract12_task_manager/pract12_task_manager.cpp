@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <Windows.h>
+#include <string>
 
 using namespace std;
 
@@ -39,13 +40,11 @@ int main()
     setlocale(LC_ALL, "Russian");
     int choice;
     do {
-        cout << "\n1. Запустить диспетчер задач(taskmgr.exe)\n";
-        cout << "2. Запустить ping [IP-address]\n";
-        cout << "3. Запустить ping -n [N] [IP-address]\n";
-        cout << "4. Запустить ping -t [IP-address]\n";
-        cout << "5. Запустить программу\n";
-        cout << "6. Показать список процессов\n";
-        cout << "7. Завершить процесс\n";
+                cout << "\n1. Запустить диспетчер задач(taskmgr.exe)\n";
+        cout << "2. Запустить ping с вводом параметров\n";
+        cout << "3. Запустить программу из вариата\n";
+        cout << "4. Показать список процессов\n";
+        cout << "5. Завершить процесс\n";
         cout << "0. Выход\n";
         cout << "Введите выбор:\n";
         cin >> choice;
@@ -59,26 +58,54 @@ int main()
             break;
         }
         case 2: {
+            int mode;
+            string ip;
+            string args;
+            cout << "1. Обычный (4 запроса)\n";
+            cout << "2. -n [N] (N запросов)\n";
+            cout << "3. -t (бесконечно)\n";
+            cout << "Выберите режим: ";
+            cin >> mode;
+            cout << "Введите IP-адрес: ";
+            cin >> ip;
+
+            if (mode == 1) {
+                args = ip;
+            }
+            else if (mode == 2) {
+                int n;
+                cout << "Введите количество запросов: ";
+                cin >> n;
+                args = "-n " + to_string(n) + " " + ip;
+            }
+            else {
+                args = "-t " + ip;
+            }
+
+            string fullPingCmd = "PING.EXE " + args;
+            wstring wPingCmd(fullPingCmd.begin(), fullPingCmd.end());
+
             wchar_t lpszAppName[] = L"C:\\Windows\\System32\\PING.EXE";
-            wchar_t lpszCmdLine[] = L"C:\\Windows\\System32\\PING.EXE 8.8.8.8";
-            startProcess(lpszAppName, lpszCmdLine, "Ping 8.8.8.8"); break;
+            startProcess(lpszAppName, &wPingCmd[0], "Ping");
+            break;
         }
+
         case 3: {
-            wchar_t lpszAppName[] = L"C:\\Windows\\System32\\PING.EXE";
-            wchar_t lpszCmdLine[] = L"C:\\Windows\\System32\\PING.EXE -n 5 8.8.8.8";
-            startProcess(lpszAppName, lpszCmdLine, "Ping -n 5"); break;
+            int num1;
+            int num2;
+            cout << "Введите начало диапазона: ";
+            cin >> num1;
+            cout << "Введите конец диапазона: ";
+            cin >> num2;
+
+            wchar_t lpszAppName[] = L"C:\\Users\\st310-02\\Desktop\\Politov PR-31\\pract12\\x64\\Debug\\pract12.exe";
+
+            wstring cmd = L"pract12.exe " + to_wstring(num1) + L" " + to_wstring(num2);
+
+            startProcess(lpszAppName, &cmd[0], "Вариант 3");
+            break;
         }
         case 4: {
-            wchar_t lpszAppName[] = L"C:\\Windows\\System32\\PING.EXE";
-            wchar_t lpszCmdLine[] = L"C:\\Windows\\System32\\PING.EXE -t 8.8.8.8";
-            startProcess(lpszAppName, lpszCmdLine, "Ping -t"); break;
-        }
-        case 5: {
-            wchar_t lpszAppName[] = L"C:\\Users\\st310-02\\Desktop\\Politov PR-31\\pract12\\x64\\Debug\\pract12.exe";
-            wchar_t lpszCmdLine[] = L"C:\\Users\\st310-02\\Desktop\\Politov PR-31\\pract12\\x64\\Debug\\pract12.exe 10 100";
-            startProcess(lpszAppName, lpszCmdLine, "Variant 3"); break;
-        }
-        case 6: {
             int activeCount = 0;
             for (int i = 0; i < procCount; i++)
             {
@@ -99,7 +126,7 @@ int main()
             cout << "Всего работающих процессов: " << activeCount << "\n";
             break;
         }
-        case 7: {
+        case 5: {
             for (int i = 0; i < procCount; i++) {
                 if (processes[i].activ) {
                     cout << "[" << i + 1 << "] " << processes[i].name << "\n";
